@@ -27,7 +27,7 @@ module "subnets" {
 
 module "s3_log_storage" {
   source  = "cloudposse/s3-log-storage/aws"
-  version = "0.26.0"
+  version = "1.0.0"
 
   force_destroy = true
   attributes    = ["logs"]
@@ -35,45 +35,22 @@ module "s3_log_storage" {
   context = module.this.context
 }
 
-module "aws_key_pair" {
-  source  = "cloudposse/key-pair/aws"
-  version = "0.18.3"
-
-  ssh_public_key_path = var.ssh_public_key_path
-  generate_ssh_key    = var.generate_ssh_key
-  attributes          = ["ssh", "key"]
-
-  context = module.this.context
-}
-
-module "emr_cluster" {
+module "network_firewall" {
   source = "../../"
 
-  master_allowed_security_groups                 = [module.vpc.vpc_default_security_group_id]
-  slave_allowed_security_groups                  = [module.vpc.vpc_default_security_group_id]
-  region                                         = var.region
-  vpc_id                                         = module.vpc.vpc_id
-  subnet_id                                      = module.this.enabled ? module.subnets.private_subnet_ids[0] : null
-  route_table_id                                 = module.this.enabled ? module.subnets.private_route_table_ids[0] : null
-  subnet_type                                    = "private"
-  ebs_root_volume_size                           = var.ebs_root_volume_size
-  visible_to_all_users                           = var.visible_to_all_users
-  release_label                                  = var.release_label
-  applications                                   = var.applications
-  configurations_json                            = var.configurations_json
-  core_instance_group_instance_type              = var.core_instance_group_instance_type
-  core_instance_group_instance_count             = var.core_instance_group_instance_count
-  core_instance_group_ebs_size                   = var.core_instance_group_ebs_size
-  core_instance_group_ebs_type                   = var.core_instance_group_ebs_type
-  core_instance_group_ebs_volumes_per_instance   = var.core_instance_group_ebs_volumes_per_instance
-  master_instance_group_instance_type            = var.master_instance_group_instance_type
-  master_instance_group_instance_count           = var.master_instance_group_instance_count
-  master_instance_group_ebs_size                 = var.master_instance_group_ebs_size
-  master_instance_group_ebs_type                 = var.master_instance_group_ebs_type
-  master_instance_group_ebs_volumes_per_instance = var.master_instance_group_ebs_volumes_per_instance
-  create_task_instance_group                     = var.create_task_instance_group
-  log_uri                                        = format("s3://%s", module.s3_log_storage.bucket_id)
-  key_name                                       = module.aws_key_pair.key_name
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.subnets.private_subnet_ids
+
+  logging_config = {
+    log_destination_type = "S3"
+    log_type             = "FLOW"
+    log_destination = {
+      bucketName = module.s3_log_storage.bucket_id
+      prefix     = "/network-firewall-logs"
+    }
+  }
+
+  rule_group_config = {}
 
   context = module.this.context
 }

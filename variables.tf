@@ -16,9 +16,9 @@ variable "network_firewall_policy_name" {
   default     = null
 }
 
-variable "subnet_mapping" {
+variable "subnet_ids" {
   type        = list(string)
-  description = "Subnet mapping for firewall endpoints"
+  description = "List of subnet IDs for firewall endpoints"
 }
 
 variable "vpc_id" {

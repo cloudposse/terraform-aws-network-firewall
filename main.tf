@@ -19,7 +19,7 @@ resource "aws_networkfirewall_firewall" "default" {
   delete_protection                 = var.delete_protection
 
   dynamic "subnet_mapping" {
-    for_each = toset(var.subnet_mapping)
+    for_each = toset(var.subnet_ids)
 
     content {
       subnet_id = subnet_mapping.value
@@ -258,12 +258,12 @@ resource "aws_networkfirewall_logging_configuration" "default" {
     log_destination_config {
       log_destination = {
         # For log_destination_type = "CloudWatchLogs"
-        logGroup = lookup(each.value, "logGroup", null)
+        logGroup = lookup(each.value.log_destination, "logGroup", null)
         # For log_destination_type = "S3"
-        bucketName = lookup(each.value, "bucketName", null)
-        prefix     = lookup(each.value, "prefix", null)
+        bucketName = lookup(each.value.log_destination, "bucketName", null)
+        prefix     = lookup(each.value.log_destination, "prefix", null)
         # For log_destination_type = "KinesisDataFirehose"
-        deliveryStream = lookup(each.value, "deliveryStream", null)
+        deliveryStream = lookup(each.value.log_destination, "deliveryStream", null)
       }
       # The location to send logs to. Valid values: S3, CloudWatchLogs, KinesisDataFirehose
       log_destination_type = each.value.log_destination_type
