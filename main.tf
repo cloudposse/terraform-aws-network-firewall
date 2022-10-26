@@ -50,11 +50,11 @@ resource "aws_networkfirewall_rule_group" "default" {
       # `rule_variables` - a configuration block that defines additional settings available to use in the rules defined in the rule group
       # Can only be specified for stateful rule groups
       dynamic "rule_variables" {
-        for_each = lookup(rule_group, "rule_variables", {})
+        for_each = lookup(rule_group.value, "rule_variables", {})
         content {
           # Set of configuration blocks that define IP address information
           dynamic "ip_sets" {
-            for_each = lookup(rule_variables, "ip_sets", [])
+            for_each = lookup(rule_variables.value, "ip_sets", [])
             content {
               key = ip_sets.value.key
               ip_set {
@@ -64,7 +64,7 @@ resource "aws_networkfirewall_rule_group" "default" {
           }
           # Set of configuration blocks that define port range information
           dynamic "port_sets" {
-            for_each = lookup(rule_variables, "port_sets", [])
+            for_each = lookup(rule_variables.value, "port_sets", [])
             content {
               key = port_sets.value.key
               port_set {
@@ -91,21 +91,21 @@ resource "aws_networkfirewall_rule_group" "default" {
       # `rules_source` - a configuration block that defines the stateful or stateless rules for the rule group
       # Only one of `rules_source_list`, `rules_string`, `stateful_rule`, or `stateless_rules_and_custom_actions` must be specified
       rules_source {
-        rules_string = lookup(lookup(rule_group, "rules_source", {}), "rules_string_file_path", null) != null ? file(rule_group.rules_source.rules_string_file_path) : null
+        rules_string = lookup(rule_group.value, "rules_string_file_path", null) != null ? file(rule_group.value.rules_string_file_path) : null
 
         dynamic "rules_source_list" {
-          for_each = lookup(lookup(rule_group, "rules_source", {}), "rules_source_list", {})
+          for_each = lookup(rule_group.value, "rules_source_list", {})
           content {
             # String value to specify whether domains in the target list are allowed or denied access. Valid values: ALLOWLIST, DENYLIST
-            generated_rules_type = rules_source_list.generated_rules_type
+            generated_rules_type = rules_source_list.value.generated_rules_type
             # Set of types of domain specifications that are provided in the targets argument. Valid values: HTTP_HOST, TLS_SNI
-            target_types = rules_source_list.target_types
+            target_types = rules_source_list.value.target_types
             # Set of domains that you want to inspect for in your traffic flows
-            targets = rules_source_list.targets
+            targets = rules_source_list.value.targets
           }
         }
         dynamic "stateful_rule" {
-          for_each = lookup(lookup(rule_group, "rules_source", {}), "stateful_rule", {})
+          for_each = lookup(rule_group.value, "stateful_rule", {})
           content {
             # Action to take with packets in a traffic flow when the flow matches the stateful rule criteria
             # For all actions, AWS Network Firewall performs the specified action and discontinues stateful inspection of the traffic flow
@@ -127,16 +127,16 @@ resource "aws_networkfirewall_rule_group" "default" {
           }
         }
         dynamic "stateless_rules_and_custom_actions" {
-          for_each = lookup(lookup(rule_group, "rules_source", {}), "stateless_rules_and_custom_actions", {})
+          for_each = lookup(rule_group.value, "stateless_rules_and_custom_actions", {})
           content {
             dynamic "custom_action" {
-              for_each = lookup(stateless_rules_and_custom_actions, "custom_action", {})
+              for_each = lookup(stateless_rules_and_custom_actions.value, "custom_action", {})
               content {
-                action_name = custom_action.action_name
+                action_name = custom_action.value.action_name
                 action_definition {
                   publish_metric_action {
                     dynamic "dimension" {
-                      for_each = custom_action.dimensions
+                      for_each = custom_action.value.dimensions
                       content {
                         value = dimension.value
                       }
@@ -146,41 +146,41 @@ resource "aws_networkfirewall_rule_group" "default" {
               }
             }
             dynamic "stateless_rule" {
-              for_each = lookup(stateless_rules_and_custom_actions, "stateless_rule", {})
+              for_each = lookup(stateless_rules_and_custom_actions.value, "stateless_rule", {})
               content {
-                priority = stateless_rule.priority
+                priority = stateless_rule.value.priority
                 rule_definition {
-                  actions = stateless_rule.rule_definition.actions
+                  actions = stateless_rule.value.rule_definition.actions
                   match_attributes {
-                    protocols = lookup(stateless_rule.rule_definition.match_attributes, "protocols", [])
+                    protocols = lookup(stateless_rule.value.rule_definition.match_attributes, "protocols", [])
                     dynamic "destination" {
-                      for_each = lookup(stateless_rule.rule_definition.match_attributes, "destination", [])
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "destination", [])
                       content {
                         address_definition = destination.value
                       }
                     }
                     dynamic "destination_port" {
-                      for_each = lookup(stateless_rule.rule_definition.match_attributes, "destination_port", [])
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "destination_port", [])
                       content {
                         from_port = destination_port.value.from_port
                         to_port   = lookup(destination_port.value, "to_port", null)
                       }
                     }
                     dynamic "source" {
-                      for_each = lookup(stateless_rule.rule_definition.match_attributes, "source", [])
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "source", [])
                       content {
                         address_definition = source.value
                       }
                     }
                     dynamic "source_port" {
-                      for_each = lookup(stateless_rule.rule_definition.match_attributes, "source_port", [])
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "source_port", [])
                       content {
                         from_port = source_port.value
                         to_port   = lookup(source_port.value, "to_port", null)
                       }
                     }
                     dynamic "tcp_flag" {
-                      for_each = lookup(stateless_rule.rule_definition.match_attributes, "tcp_flag", [])
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "tcp_flag", [])
                       content {
                         flags = tcp_flag.value.flags
                         masks = lookup(tcp_flag.value, "masks", null)
