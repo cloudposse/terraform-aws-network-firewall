@@ -79,12 +79,12 @@ resource "aws_networkfirewall_rule_group" "default" {
       # If the STRICT_ORDER rule order is specified, this rule group can only be referenced in firewall policies that also utilize STRICT_ORDER for the stateful engine
       # STRICT_ORDER can only be specified when using a rules_source of rules_string or stateful_rule
       dynamic "stateful_rule_options" {
-        for_each = var.stateful_engine_options_rule_order != null && var.stateful_engine_options_rule_order != "" ? [true] : []
+        for_each = var.rule_group_stateful_engine_options_rule_order != null && var.rule_group_stateful_engine_options_rule_order != "" ? [true] : []
         content {
           # Indicates how to manage the order of the rule evaluation for the rule group
           # Default value: DEFAULT_ACTION_ORDER
           # Valid values: DEFAULT_ACTION_ORDER, STRICT_ORDER
-          rule_order = var.stateful_engine_options_rule_order
+          rule_order = var.rule_group_stateful_engine_options_rule_order
         }
       }
 
@@ -223,9 +223,9 @@ resource "aws_networkfirewall_firewall_policy" "default" {
     }
 
     dynamic "stateful_engine_options" {
-      for_each = var.stateful_engine_options_rule_order != null && var.stateful_engine_options_rule_order != "" ? [true] : []
+      for_each = var.policy_stateful_engine_options_rule_order != null && var.policy_stateful_engine_options_rule_order != "" ? [true] : []
       content {
-        rule_order = var.stateful_engine_options_rule_order
+        rule_order = var.policy_stateful_engine_options_rule_order
       }
     }
 

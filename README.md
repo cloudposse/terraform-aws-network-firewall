@@ -146,17 +146,18 @@ module "network_firewall" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.subnets.private_subnet_ids
 
-  network_firewall_name              = var.network_firewall_name
-  network_firewall_description       = var.network_firewall_description
-  network_firewall_policy_name       = var.network_firewall_policy_name
-  stateful_engine_options_rule_order = var.stateful_engine_options_rule_order
-  stateful_default_actions           = var.stateful_default_actions
-  stateless_default_actions          = var.stateless_default_actions
-  stateless_fragment_default_actions = var.stateless_fragment_default_actions
-  stateless_custom_actions           = var.stateless_custom_actions
-  delete_protection                  = var.delete_protection
-  firewall_policy_change_protection  = var.firewall_policy_change_protection
-  subnet_change_protection           = var.subnet_change_protection
+  network_firewall_name                         = var.network_firewall_name
+  network_firewall_description                  = var.network_firewall_description
+  network_firewall_policy_name                  = var.network_firewall_policy_name
+  rule_group_stateful_engine_options_rule_order = var.rule_group_stateful_engine_options_rule_order
+  policy_stateful_engine_options_rule_order     = var.policy_stateful_engine_options_rule_order
+  stateful_default_actions                      = var.stateful_default_actions
+  stateless_default_actions                     = var.stateless_default_actions
+  stateless_fragment_default_actions            = var.stateless_fragment_default_actions
+  stateless_custom_actions                      = var.stateless_custom_actions
+  delete_protection                             = var.delete_protection
+  firewall_policy_change_protection             = var.firewall_policy_change_protection
+  subnet_change_protection                      = var.subnet_change_protection
 
   logging_config = [
     {
@@ -287,11 +288,12 @@ Available targets:
 | <a name="input_network_firewall_description"></a> [network\_firewall\_description](#input\_network\_firewall\_description) | AWS Network Firewall description. If not provided, the Network Firewall name will be used | `string` | `null` | no |
 | <a name="input_network_firewall_name"></a> [network\_firewall\_name](#input\_network\_firewall\_name) | AWS Network Firewall name. If not provided, the name will be derived from the context | `string` | `null` | no |
 | <a name="input_network_firewall_policy_name"></a> [network\_firewall\_policy\_name](#input\_network\_firewall\_policy\_name) | AWS Network Firewall policy name. If not provided, the name will be derived from the context | `string` | `null` | no |
+| <a name="input_policy_stateful_engine_options_rule_order"></a> [policy\_stateful\_engine\_options\_rule\_order](#input\_policy\_stateful\_engine\_options\_rule\_order) | Indicates how to manage the order of stateful rule evaluation for the policy. Valid values: DEFAULT\_ACTION\_ORDER, STRICT\_ORDER | `string` | `null` | no |
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Terraform regular expression (regex) string.<br>Characters matching the regex will be removed from the ID elements.<br>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
 | <a name="input_rule_group_config"></a> [rule\_group\_config](#input\_rule\_group\_config) | Rule group configuration. Refer to https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group for configuration details | `any` | n/a | yes |
+| <a name="input_rule_group_stateful_engine_options_rule_order"></a> [rule\_group\_stateful\_engine\_options\_rule\_order](#input\_rule\_group\_stateful\_engine\_options\_rule\_order) | Indicates how to manage the order of the rule evaluation for the rule group. Default value: DEFAULT\_ACTION\_ORDER. Valid values: DEFAULT\_ACTION\_ORDER, STRICT\_ORDER | `string` | `null` | no |
 | <a name="input_stage"></a> [stage](#input\_stage) | ID element. Usually used to indicate role, e.g. 'prod', 'staging', 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
 | <a name="input_stateful_default_actions"></a> [stateful\_default\_actions](#input\_stateful\_default\_actions) | Default stateful actions | `list(string)` | <pre>[<br>  "aws:alert_strict"<br>]</pre> | no |
-| <a name="input_stateful_engine_options_rule_order"></a> [stateful\_engine\_options\_rule\_order](#input\_stateful\_engine\_options\_rule\_order) | Indicates how to manage the order of stateful rule evaluation for the policy. Valid values: DEFAULT\_ACTION\_ORDER, STRICT\_ORDER | `string` | `"DEFAULT_ACTION_ORDER"` | no |
 | <a name="input_stateless_custom_actions"></a> [stateless\_custom\_actions](#input\_stateless\_custom\_actions) | Set of configuration blocks describing the custom action definitions that are available for use in the firewall policy's `stateless_default_actions` | <pre>list(object({<br>    action_name = string<br>    dimensions  = list(string)<br>  }))</pre> | `[]` | no |
 | <a name="input_stateless_default_actions"></a> [stateless\_default\_actions](#input\_stateless\_default\_actions) | Default stateless actions | `list(string)` | <pre>[<br>  "aws:forward_to_sfe"<br>]</pre> | no |
 | <a name="input_stateless_fragment_default_actions"></a> [stateless\_fragment\_default\_actions](#input\_stateless\_fragment\_default\_actions) | Default stateless actions for fragmented packets | `list(string)` | <pre>[<br>  "aws:forward_to_sfe"<br>]</pre> | no |
