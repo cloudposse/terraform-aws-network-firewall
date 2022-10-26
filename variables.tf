@@ -26,12 +26,6 @@ variable "vpc_id" {
   description = "VPC ID"
 }
 
-variable "rule_group_stateful_engine_options_rule_order" {
-  type        = string
-  description = "Indicates how to manage the order of the rule evaluation for the rule group. Default value: DEFAULT_ACTION_ORDER. Valid values: DEFAULT_ACTION_ORDER, STRICT_ORDER"
-  default     = null
-}
-
 variable "policy_stateful_engine_options_rule_order" {
   type        = string
   description = "Indicates how to manage the order of stateful rule evaluation for the policy. Valid values: DEFAULT_ACTION_ORDER, STRICT_ORDER"
