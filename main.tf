@@ -40,7 +40,7 @@ resource "aws_networkfirewall_rule_group" "default" {
   description = lookup(each.value, "description", each.value.name)
   capacity    = each.value.capacity
 
-  # he stateful rule group rules specifications in Suricata file format, with one rule per line
+  # The stateful rule group rules specifications in Suricata file format, with one rule per line
   # Use this to import your existing Suricata compatible rule groups
   rules = lookup(each.value, "suricata_rules_file_path", null) != null ? file(each.value.suricata_rules_file_path) : null
 
