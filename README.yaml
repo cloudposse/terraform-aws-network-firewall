@@ -156,7 +156,7 @@ usage: |2-
                 }
                 rule_option = {
                   keyword = "sid:1"
-                } 
+                }
               }
             ]
           }

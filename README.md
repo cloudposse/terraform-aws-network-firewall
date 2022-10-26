@@ -191,7 +191,7 @@ module "network_firewall" {
               }
               rule_option = {
                 keyword = "sid:1"
-              } 
+              }
             }
           ]
         }
