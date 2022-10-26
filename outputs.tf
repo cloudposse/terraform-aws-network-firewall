@@ -1,6 +1,6 @@
-output "network_firewall_id" {
+output "network_firewall_name" {
   description = "Network Firewall ID"
-  value       = one(aws_networkfirewall_firewall.default.*.id)
+  value       = one(aws_networkfirewall_firewall.default.*.name)
 }
 
 output "network_firewall_arn" {
@@ -18,9 +18,9 @@ output "network_firewall_status" {
   value       = one(aws_networkfirewall_firewall.default.*.firewall_status)
 }
 
-output "network_firewall_policy_id" {
+output "network_firewall_policy_name" {
   description = "Network Firewall policy ID"
-  value       = one(aws_networkfirewall_firewall_policy.default.*.id)
+  value       = one(aws_networkfirewall_firewall_policy.default.*.name)
 }
 
 output "network_firewall_policy_arn" {

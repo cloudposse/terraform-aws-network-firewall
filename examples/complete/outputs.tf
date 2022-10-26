@@ -13,9 +13,9 @@ output "private_subnet_cidrs" {
   description = "Private subnet CIDRs"
 }
 
-output "network_firewall_id" {
+output "network_firewall_name" {
   description = "Network Firewall ID"
-  value       = module.network_firewall.network_firewall_id
+  value       = module.network_firewall.network_firewall_name
 }
 
 output "network_firewall_arn" {
@@ -33,9 +33,9 @@ output "network_firewall_status" {
   value       = module.network_firewall.network_firewall_status
 }
 
-output "network_firewall_policy_id" {
+output "network_firewall_policy_name" {
   description = "Network Firewall policy ID"
-  value       = module.network_firewall.network_firewall_policy_id
+  value       = module.network_firewall.network_firewall_policy_name
 }
 
 output "network_firewall_policy_arn" {

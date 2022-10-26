@@ -56,14 +56,14 @@ func TestExamplesComplete(t *testing.T) {
 	assert.Equal(t, []string{"172.19.96.0/19"}, publicSubnetCidrs)
 
 	// Run `terraform output` to get the value of an output variable
-	networkFirewallId := terraform.Output(t, terraformOptions, "network_firewall_id")
+	networkFirewallName := terraform.Output(t, terraformOptions, "network_firewall_name")
 	// Verify we're getting back the outputs we expect
-	assert.Equal(t, testNamePrefix, networkFirewallId)
+	assert.Equal(t, testNamePrefix, networkFirewallName)
 
 	// Run `terraform output` to get the value of an output variable
-	networkFirewallPolicyId := terraform.Output(t, terraformOptions, "network_firewall_policy_id")
+	networkFirewallPolicyName := terraform.Output(t, terraformOptions, "network_firewall_policy_name")
 	// Verify we're getting back the outputs we expect
-	assert.Equal(t, testNamePrefix, networkFirewallPolicyId)
+	assert.Equal(t, testNamePrefix, networkFirewallPolicyName)
 }
 
 func TestExamplesCompleteDisabled(t *testing.T) {
