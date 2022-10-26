@@ -3,6 +3,8 @@ locals {
   network_firewall_name        = coalesce(var.network_firewall_name, module.this.id)
   network_firewall_description = coalesce(var.network_firewall_description, local.network_firewall_name)
   network_firewall_policy_name = coalesce(var.network_firewall_policy_name, module.this.id)
+  rule_group_config            = { for k, v in var.rule_group_config : k => v if local.enabled }
+  logging_config               = { for k, v in var.logging_config : k => v if local.enabled }
 }
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall
@@ -31,7 +33,7 @@ resource "aws_networkfirewall_firewall" "default" {
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group
 resource "aws_networkfirewall_rule_group" "default" {
-  for_each = local.enabled ? var.rule_group_config : {}
+  for_each = local.rule_group_config
 
   type        = each.value.type
   name        = each.value.name
@@ -250,7 +252,7 @@ resource "aws_networkfirewall_firewall_policy" "default" {
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_logging_configuration
 resource "aws_networkfirewall_logging_configuration" "default" {
-  for_each = local.enabled ? var.logging_config : {}
+  for_each = local.logging_config
 
   firewall_arn = one(aws_networkfirewall_firewall.default.*.arn)
 

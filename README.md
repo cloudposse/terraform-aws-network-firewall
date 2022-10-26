@@ -105,7 +105,8 @@ provider "aws" {
 
 module "vpc" {
   source  = "cloudposse/vpc/aws"
-  version = "1.1.0"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version     = "x.x.x"
 
   ipv4_primary_cidr_block = "172.19.0.0/16"
 
@@ -114,7 +115,8 @@ module "vpc" {
 
 module "subnets" {
   source  = "cloudposse/dynamic-subnets/aws"
-  version = "2.0.2"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version     = "x.x.x"
 
   availability_zones   = var.availability_zones
   vpc_id               = module.vpc.vpc_id
@@ -137,7 +139,9 @@ module "s3_log_storage" {
 }
 
 module "network_firewall" {
-  source = "../../"
+  source  = "cloudposse/network-firewall/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version     = "x.x.x"
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.subnets.private_subnet_ids
