@@ -73,8 +73,6 @@
 | <a name="output_network_firewall_id"></a> [network\_firewall\_id](#output\_network\_firewall\_id) | Network Firewall ID |
 | <a name="output_network_firewall_policy_arn"></a> [network\_firewall\_policy\_arn](#output\_network\_firewall\_policy\_arn) | Network Firewall policy ARN |
 | <a name="output_network_firewall_policy_id"></a> [network\_firewall\_policy\_id](#output\_network\_firewall\_policy\_id) | Network Firewall policy ID |
-| <a name="output_network_firewall_rule_group_arns"></a> [network\_firewall\_rule\_group\_arns](#output\_network\_firewall\_rule\_group\_arns) | Network Firewall rule group ARNa |
-| <a name="output_network_firewall_rule_group_ids"></a> [network\_firewall\_rule\_group\_ids](#output\_network\_firewall\_rule\_group\_ids) | Network Firewall rule group IDs |
 | <a name="output_network_firewall_status"></a> [network\_firewall\_status](#output\_network\_firewall\_status) | Nested list of information about the current status of the Network Firewall |
 | <a name="output_network_firewall_update_token"></a> [network\_firewall\_update\_token](#output\_network\_firewall\_update\_token) | A string token used when updating the Network Firewall |
 <!-- markdownlint-restore -->

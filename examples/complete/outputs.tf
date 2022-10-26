@@ -42,13 +42,3 @@ output "network_firewall_policy_arn" {
   description = "Network Firewall policy ARN"
   value       = module.network_firewall.network_firewall_policy_arn
 }
-
-output "network_firewall_rule_group_ids" {
-  description = "Network Firewall rule group IDs"
-  value       = module.network_firewall.network_firewall_rule_group_ids
-}
-
-output "network_firewall_rule_group_arns" {
-  description = "Network Firewall rule group ARNa"
-  value       = module.network_firewall.network_firewall_rule_group_arns
-}

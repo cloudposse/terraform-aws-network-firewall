@@ -123,14 +123,16 @@ usage: |2-
     firewall_policy_change_protection  = var.firewall_policy_change_protection
     subnet_change_protection           = var.subnet_change_protection
 
-    logging_config = {
-      log_destination_type = "S3"
-      log_type             = "FLOW"
-      log_destination = {
-        bucketName = module.s3_log_storage.bucket_id
-        prefix     = "/network-firewall-logs"
+    logging_config = [
+      {
+        log_destination_type = "S3"
+        log_type             = "FLOW"
+        log_destination = {
+          bucketName = module.s3_log_storage.bucket_id
+          prefix     = "/network-firewall-logs"
+        }
       }
-    }
+    ]
 
     rule_group_config = {
       stateful-inspection-for-denying-access-to-domain = {

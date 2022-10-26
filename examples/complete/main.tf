@@ -54,14 +54,16 @@ module "network_firewall" {
   subnet_change_protection           = var.subnet_change_protection
 
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_logging_configuration
-  logging_config = {
-    log_destination_type = "S3"
-    log_type             = "FLOW"
-    log_destination = {
-      bucketName = module.s3_log_storage.bucket_id
-      prefix     = "/network-firewall-logs"
+  logging_config = [
+    {
+      log_destination_type = "S3"
+      log_type             = "FLOW"
+      log_destination = {
+        bucketName = module.s3_log_storage.bucket_id
+        prefix     = "/network-firewall-logs"
+      }
     }
-  }
+  ]
 
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group
   rule_group_config = {
