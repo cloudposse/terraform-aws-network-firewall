@@ -89,10 +89,10 @@ resource "aws_networkfirewall_rule_group" "default" {
       # `rules_source` - a configuration block that defines the stateful or stateless rules for the rule group
       # Only one of `rules_source_list`, `rules_string`, `stateful_rule`, or `stateless_rules_and_custom_actions` must be specified
       rules_source {
-        rules_string = lookup(rule_group.value, "rules_string", null)
+        rules_string = lookup(rule_group.value.rules_source, "rules_string", null)
 
         dynamic "rules_source_list" {
-          for_each = lookup(rule_group.value, "rules_source_list", null) != null ? [true] : []
+          for_each = lookup(rule_group.value.rules_source, "rules_source_list", null) != null ? [true] : []
           content {
             # String value to specify whether domains in the target list are allowed or denied access. Valid values: ALLOWLIST, DENYLIST
             generated_rules_type = rules_source_list.value.generated_rules_type
@@ -103,7 +103,7 @@ resource "aws_networkfirewall_rule_group" "default" {
           }
         }
         dynamic "stateful_rule" {
-          for_each = lookup(rule_group.value, "rules_source_list", null) != null ? [true] : []
+          for_each = lookup(rule_group.value.rules_source, "rules_source_list", null) != null ? [true] : []
           content {
             # Action to take with packets in a traffic flow when the flow matches the stateful rule criteria
             # For all actions, AWS Network Firewall performs the specified action and discontinues stateful inspection of the traffic flow
@@ -125,8 +125,24 @@ resource "aws_networkfirewall_rule_group" "default" {
           }
         }
         dynamic "stateless_rules_and_custom_actions" {
-          for_each = ""
+          for_each = lookup(rule_group.value.rules_source, "stateless_rules_and_custom_actions", null) != null ? [true] : []
           content {
+            dynamic "custom_action" {
+              for_each = lookup(stateless_rules_and_custom_actions.value, "custom_action", null) != null ? [true] : []
+              content {
+                action_name = custom_action.value.action_name
+                action_definition {
+                  publish_metric_action {
+                    dynamic "dimension" {
+                      for_each = custom_action.value.dimensions
+                      content {
+                        value = dimension.value
+                      }
+                    }
+                  }
+                }
+              }
+            }
             stateless_rule {
               priority = 0
               rule_definition {
