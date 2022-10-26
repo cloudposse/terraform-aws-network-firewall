@@ -30,7 +30,7 @@ module "s3_log_storage" {
   version = "1.0.0"
 
   force_destroy = true
-  attributes    = ["logs"]
+  attributes    = ["network", "firewall", "logs"]
 
   context = module.this.context
 }
@@ -41,6 +41,7 @@ module "network_firewall" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.subnets.private_subnet_ids
 
+  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_logging_configuration
   logging_config = {
     log_destination_type = "S3"
     log_type             = "FLOW"
@@ -50,7 +51,39 @@ module "network_firewall" {
     }
   }
 
-  rule_group_config = {}
+  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group
+  rule_group_config = {
+    stateful-inspection-for-denying-access-to-domain = {
+      capacity    = 100
+      name        = "Deny access to a domain"
+      description = "This rule group denies access to test.example.com"
+      type        = "STATEFUL"
+      rule_group = {
+        rules_source = {
+          rules_source_list = {
+            generated_rules_type = "DENYLIST"
+            target_types         = ["HTTP_HOST"]
+            targets              = ["test.example.com"]
+          }
+        }
+      }
+    }
+    stateful-inspection-for-permitting-packets-from-cidr = {
+      capacity    = 50
+      name        = "Permit HTTP traffic from CIDR blocks"
+      description = "This rule group permits HTTP traffic from CIDR blocks"
+      type        = "STATEFUL"
+      rule_group = {
+        rules_source = {
+          rules_source_list = {
+            generated_rules_type = "DENYLIST"
+            target_types         = ["HTTP_HOST"]
+            targets              = ["test.example.com"]
+          }
+        }
+      }
+    }
+  }
 
   context = module.this.context
 }
