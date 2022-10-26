@@ -41,6 +41,18 @@ module "network_firewall" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.subnets.private_subnet_ids
 
+  network_firewall_name              = var.network_firewall_name
+  network_firewall_description       = var.network_firewall_description
+  network_firewall_policy_name       = var.network_firewall_policy_name
+  stateful_engine_options_rule_order = var.stateful_engine_options_rule_order
+  stateful_default_actions           = var.stateful_default_actions
+  stateless_default_actions          = var.stateless_default_actions
+  stateless_fragment_default_actions = var.stateless_fragment_default_actions
+  stateless_custom_actions           = var.stateless_custom_actions
+  delete_protection                  = var.delete_protection
+  firewall_policy_change_protection  = var.firewall_policy_change_protection
+  subnet_change_protection           = var.subnet_change_protection
+
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_logging_configuration
   logging_config = {
     log_destination_type = "S3"

@@ -76,14 +76,3 @@ variable "subnet_change_protection" {
   description = "A boolean flag indicating whether it is possible to change the associated subnet(s)"
   default     = false
 }
-
-variable "rule_group_config" {
-  type        = map(any)
-  description = "Rule group configuration. Refer to https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group for configuration details"
-}
-
-variable "logging_config" {
-  type        = map(any)
-  description = "Logging configuration"
-  default     = {}
-}
