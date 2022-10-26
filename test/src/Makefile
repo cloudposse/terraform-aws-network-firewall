@@ -16,7 +16,7 @@ init:
 ## Run tests
 test: init
 	go mod download
-	go test -v -timeout 60m
+	go test -v -timeout 20m
 
 ## Run tests in docker container
 docker/test:

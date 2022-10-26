@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	testStructure "github.com/gruntwork-io/terratest/modules/test-structure"
@@ -15,7 +14,7 @@ func TestExamplesComplete(t *testing.T) {
 	t.Parallel()
 	randID := strings.ToLower(random.UniqueId())
 	attributes := []string{randID}
-	testNamePrefix := "eg-test-emr-" + randID
+	testNamePrefix := "eg-test-network-firewall-" + randID
 
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
@@ -57,19 +56,14 @@ func TestExamplesComplete(t *testing.T) {
 	assert.Equal(t, []string{"172.19.96.0/19"}, publicSubnetCidrs)
 
 	// Run `terraform output` to get the value of an output variable
-	s3LogStorageBucketId := terraform.Output(t, terraformOptions, "s3_log_storage_bucket_id")
+	networkFirewallId := terraform.Output(t, terraformOptions, "network_firewall_id")
 	// Verify we're getting back the outputs we expect
-	assert.Equal(t, fmt.Sprintf("%s-logs", testNamePrefix), s3LogStorageBucketId)
+	assert.Equal(t, testNamePrefix, networkFirewallId)
 
 	// Run `terraform output` to get the value of an output variable
-	awsKeyPairKeyName := terraform.Output(t, terraformOptions, "aws_key_pair_key_name")
+	networkFirewallPolicyId := terraform.Output(t, terraformOptions, "network_firewall_policy_id")
 	// Verify we're getting back the outputs we expect
-	assert.Equal(t, fmt.Sprintf("%s-ssh-key", testNamePrefix), awsKeyPairKeyName)
-
-	// Run `terraform output` to get the value of an output variable
-	clusterName := terraform.Output(t, terraformOptions, "cluster_name")
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, testNamePrefix, clusterName)
+	assert.Equal(t, testNamePrefix, networkFirewallPolicyId)
 }
 
 func TestExamplesCompleteDisabled(t *testing.T) {
