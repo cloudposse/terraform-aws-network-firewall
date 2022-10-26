@@ -68,21 +68,6 @@ module "network_firewall" {
 
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group
   rule_group_config = {
-    stateful-inspection-for-denying-access-to-domain = {
-      capacity    = 100
-      name        = "deny-access-to-domain"
-      description = "This rule denies access to test.example.com"
-      type        = "STATEFUL"
-      rule_group = {
-        rules_source = {
-          rules_source_list = {
-            generated_rules_type = "DENYLIST"
-            target_types         = ["HTTP_HOST"]
-            targets              = ["test.example.com"]
-          }
-        }
-      }
-    }
     stateful-inspection-for-blocking-packets-from-going-to-destination = {
       capacity    = 50
       name        = "block-packets-from-going-to-destination"

@@ -219,6 +219,7 @@ resource "aws_networkfirewall_firewall_policy" "default" {
       for_each = toset([for k, v in aws_networkfirewall_rule_group.default : v.arn if v.type == "STATEFUL"])
       content {
         resource_arn = stateful_rule_group_reference.value
+        priority     = index([for k, v in aws_networkfirewall_rule_group.default : v.arn if v.type == "STATEFUL"], stateful_rule_group_reference.value) + 1
       }
     }
 
