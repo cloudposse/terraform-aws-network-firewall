@@ -5,6 +5,7 @@
 # Module directory
 .terraform
 .terraform.lock.hcl
+.terraform.tfstate.lock.info
 .idea
 .idea/
 *.iml

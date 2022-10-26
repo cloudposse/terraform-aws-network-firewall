@@ -133,7 +133,7 @@ module "s3_log_storage" {
   version = "1.0.0"
 
   force_destroy = true
-  attributes    = ["network", "firewall", "logs"]
+  attributes    = ["logs"]
 
   context = module.this.context
 }
@@ -172,8 +172,8 @@ module "network_firewall" {
   rule_group_config = {
     stateful-inspection-for-denying-access-to-domain = {
       capacity    = 100
-      name        = "Deny access to a domain"
-      description = "This rule group denies access to test.example.com"
+      name        = "deny-access-to-domain"
+      description = "This rule denies access to test.example.com"
       type        = "STATEFUL"
       rule_group = {
         rules_source = {
@@ -187,7 +187,7 @@ module "network_firewall" {
     }
     stateful-inspection-for-blocking-packets-from-going-to-destination = {
       capacity    = 50
-      name        = "Block packets from going to an intended destination"
+      name        = "block-packets-from-going-to-destination"
       description = "Stateful Inspection for blocking packets from going to an intended destination"
       type        = "STATEFUL"
       rule_group = {
