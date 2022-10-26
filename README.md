@@ -28,7 +28,7 @@
 
 -->
 
-Terraform module to provision an Elastic MapReduce (EMR) cluster on AWS.
+Terraform module to provision AWS Network Firewall resources.
 
 ---
 
@@ -100,13 +100,12 @@ For automated tests of the complete example using [bats](https://github.com/bats
 
 ```hcl
 provider "aws" {
-  region = "us-east-2"
+  region = var.region
 }
 
 module "vpc" {
   source  = "cloudposse/vpc/aws"
-  # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  version = "1.1.0"
 
   ipv4_primary_cidr_block = "172.19.0.0/16"
 
@@ -114,9 +113,8 @@ module "vpc" {
 }
 
 module "subnets" {
-  source = "cloudposse/dynamic-subnets/aws"
-  # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  source  = "cloudposse/dynamic-subnets/aws"
+  version = "2.0.2"
 
   availability_zones   = var.availability_zones
   vpc_id               = module.vpc.vpc_id
@@ -129,63 +127,75 @@ module "subnets" {
 }
 
 module "s3_log_storage" {
-  source = "cloudposse/s3-log-storage/aws"
-  # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
-  
-  region        = var.region
-  namespace     = var.namespace
-  stage         = var.stage
-  name          = var.name
-  attributes    = ["logs"]
+  source  = "cloudposse/s3-log-storage/aws"
+  version = "1.0.0"
+
   force_destroy = true
+  attributes    = ["network", "firewall", "logs"]
+
+  context = module.this.context
 }
 
-module "aws_key_pair" {
-  source = "cloudposse/key-pair/aws"
-  # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
-  namespace           = var.namespace
-  stage               = var.stage
-  name                = var.name
-  attributes          = ["ssh", "key"]
-  ssh_public_key_path = var.ssh_public_key_path
-  generate_ssh_key    = var.generate_ssh_key
-}
+module "network_firewall" {
+  source = "../../"
 
-module "emr_cluster" {
-  source = "cloudposse/emr-cluster/aws"
-  # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
-  
-  namespace                                      = var.namespace
-  stage                                          = var.stage
-  name                                           = var.name
-  master_allowed_security_groups                 = [module.vpc.vpc_default_security_group_id]
-  slave_allowed_security_groups                  = [module.vpc.vpc_default_security_group_id]
-  region                                         = var.region
-  vpc_id                                         = module.vpc.vpc_id
-  subnet_id                                      = module.subnets.private_subnet_ids[0]
-  route_table_id                                 = module.subnets.private_route_table_ids[0]
-  subnet_type                                    = "private"
-  ebs_root_volume_size                           = var.ebs_root_volume_size
-  visible_to_all_users                           = var.visible_to_all_users
-  release_label                                  = var.release_label
-  applications                                   = var.applications
-  configurations_json                            = var.configurations_json
-  core_instance_group_instance_type              = var.core_instance_group_instance_type
-  core_instance_group_instance_count             = var.core_instance_group_instance_count
-  core_instance_group_ebs_size                   = var.core_instance_group_ebs_size
-  core_instance_group_ebs_type                   = var.core_instance_group_ebs_type
-  core_instance_group_ebs_volumes_per_instance   = var.core_instance_group_ebs_volumes_per_instance
-  master_instance_group_instance_type            = var.master_instance_group_instance_type
-  master_instance_group_instance_count           = var.master_instance_group_instance_count
-  master_instance_group_ebs_size                 = var.master_instance_group_ebs_size
-  master_instance_group_ebs_type                 = var.master_instance_group_ebs_type
-  master_instance_group_ebs_volumes_per_instance = var.master_instance_group_ebs_volumes_per_instance
-  create_task_instance_group                     = var.create_task_instance_group
-  log_uri                                        = format("s3n://%s/", module.s3_log_storage.bucket_id)
-  key_name                                       = module.aws_key_pair.key_name
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.subnets.private_subnet_ids
+
+  logging_config = {
+    log_destination_type = "S3"
+    log_type             = "FLOW"
+    log_destination = {
+      bucketName = module.s3_log_storage.bucket_id
+      prefix     = "/network-firewall-logs"
+    }
+  }
+
+  rule_group_config = {
+    stateful-inspection-for-denying-access-to-domain = {
+      capacity    = 100
+      name        = "Deny access to a domain"
+      description = "This rule group denies access to test.example.com"
+      type        = "STATEFUL"
+      rule_group = {
+        rules_source = {
+          rules_source_list = {
+            generated_rules_type = "DENYLIST"
+            target_types         = ["HTTP_HOST"]
+            targets              = ["test.example.com"]
+          }
+        }
+      }
+    }
+    stateful-inspection-for-blocking-packets-from-going-to-destination = {
+      capacity    = 50
+      name        = "Block packets from going to an intended destination"
+      description = "Stateful Inspection for blocking packets from going to an intended destination"
+      type        = "STATEFUL"
+      rule_group = {
+        rules_source = {
+          stateful_rule = [
+            {
+              action = "DROP"
+              header = {
+                destination      = "124.1.1.24/32"
+                destination_port = 53
+                direction        = "ANY"
+                protocol         = "TCP"
+                source           = "1.2.3.4/32"
+                source_port      = 53
+              }
+              rule_option = {
+                keyword = "sid:1"
+              } 
+            }
+          ]
+        }
+      }
+    }
+  }
+
+  context = module.this.context
 }
 ```
 
@@ -301,9 +311,10 @@ Are you using this project or any of our other projects? Consider [leaving a tes
 
 Check out these related projects.
 
-- [terraform-aws-rds-cluster](https://github.com/cloudposse/terraform-aws-rds-cluster) - Terraform module to provision an RDS Aurora cluster for MySQL or Postgres
-- [terraform-aws-rds](https://github.com/cloudposse/terraform-aws-rds) - Terraform module to provision AWS RDS instances
-- [terraform-aws-rds-cloudwatch-sns-alarms](https://github.com/cloudposse/terraform-aws-rds-cloudwatch-sns-alarms) - Terraform module that configures important RDS alerts using CloudWatch and sends them to an SNS topic
+- [terraform-aws-vpc](https://github.com/cloudposse/terraform-aws-vpc) - Terraform Module that defines a VPC with public/private subnets across multiple AZs with Internet Gateways
+- [terraform-aws-dynamic-subnets](https://github.com/cloudposse/terraform-aws-dynamic-subnets) - Terraform module for public and private subnets provisioning in existing VPC
+- [terraform-aws-named-subnets](https://github.com/cloudposse/terraform-aws-named-subnets) - Terraform module for named subnets provisioning.
+- [terraform-aws-vpc-peering](https://github.com/cloudposse/terraform-aws-vpc-peering) - Terraform module to create a peering connection between two VPCs
 
 ## Help
 

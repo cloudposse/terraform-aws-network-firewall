@@ -103,7 +103,7 @@ resource "aws_networkfirewall_rule_group" "default" {
           }
         }
         dynamic "stateful_rule" {
-          for_each = lookup(rule_group.value.rules_source, "stateful_rule", null) != null ? [true] : []
+          for_each = lookup(rule_group.value.rules_source, "stateful_rule", [])
           content {
             # Action to take with packets in a traffic flow when the flow matches the stateful rule criteria
             # For all actions, AWS Network Firewall performs the specified action and discontinues stateful inspection of the traffic flow

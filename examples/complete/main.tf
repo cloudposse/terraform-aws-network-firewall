@@ -68,18 +68,29 @@ module "network_firewall" {
         }
       }
     }
-    stateful-inspection-for-permitting-packets-from-cidr = {
+    stateful-inspection-for-blocking-packets-from-going-to-destination = {
       capacity    = 50
-      name        = "Permit HTTP traffic from CIDR blocks"
-      description = "This rule group permits HTTP traffic from CIDR blocks"
+      name        = "Block packets from going to an intended destination"
+      description = "Stateful Inspection for blocking packets from going to an intended destination"
       type        = "STATEFUL"
       rule_group = {
         rules_source = {
-          rules_source_list = {
-            generated_rules_type = "DENYLIST"
-            target_types         = ["HTTP_HOST"]
-            targets              = ["test.example.com"]
-          }
+          stateful_rule = [
+            {
+              action = "DROP"
+              header = {
+                destination      = "124.1.1.24/32"
+                destination_port = 53
+                direction        = "ANY"
+                protocol         = "TCP"
+                source           = "1.2.3.4/32"
+                source_port      = 53
+              }
+              rule_option = {
+                keyword = "sid:1"
+              }
+            }
+          ]
         }
       }
     }
