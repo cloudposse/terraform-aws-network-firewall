@@ -38,23 +38,103 @@ resource "aws_networkfirewall_rule_group" "default" {
   description = lookup(each.value, "description", each.value.name)
   capacity    = each.value.capacity
 
+  # he stateful rule group rules specifications in Suricata file format, with one rule per line
+  # Use this to import your existing Suricata compatible rule groups
   rules = lookup(each.value, "suricata_rules_file_path", null) != null ? file(each.value.suricata_rules_file_path) : null
 
   dynamic "rule_group" {
     for_each = lookup(each.value, "rule_group", null) != null ? [true] : []
     content {
-      rules_source {
-      }
-
+      # `rule_variables` - a configuration block that defines additional settings available to use in the rules defined in the rule group
+      # Can only be specified for stateful rule groups
       dynamic "rule_variables" {
-        for_each = ""
-        content {}
+        for_each = lookup(rule_group.value, "rule_variables", null) != null ? [true] : []
+        content {
+          # Set of configuration blocks that define IP address information
+          dynamic "ip_sets" {
+            for_each = lookup(rule_variables.value, "ip_sets", [])
+            content {
+              key = ip_sets.value.key
+              ip_set {
+                definition = ip_sets.value.definition
+              }
+            }
+          }
+          # Set of configuration blocks that define port range information
+          dynamic "port_sets" {
+            for_each = lookup(rule_variables.value, "port_sets", [])
+            content {
+              key = port_sets.value.key
+              port_set {
+                definition = port_sets.value.definition
+              }
+            }
+          }
+        }
       }
 
+      # `stateful_rule_options` - a configuration block that defines stateful rule options for the rule group
+      # If the STRICT_ORDER rule order is specified, this rule group can only be referenced in firewall policies that also utilize STRICT_ORDER for the stateful engine
+      # STRICT_ORDER can only be specified when using a rules_source of rules_string or stateful_rule
       dynamic "stateful_rule_options" {
-        for_each = ""
+        for_each = var.stateful_engine_options_rule_order != null && var.stateful_engine_options_rule_order != "" ? [true] : []
         content {
-          rule_order = ""
+          # Indicates how to manage the order of the rule evaluation for the rule group
+          # Default value: DEFAULT_ACTION_ORDER
+          # Valid values: DEFAULT_ACTION_ORDER, STRICT_ORDER
+          rule_order = var.stateful_engine_options_rule_order
+        }
+      }
+
+      # `rules_source` - a configuration block that defines the stateful or stateless rules for the rule group
+      # Only one of `rules_source_list`, `rules_string`, `stateful_rule`, or `stateless_rules_and_custom_actions` must be specified
+      rules_source {
+        rules_string = lookup(rule_group.value, "rules_string", null)
+
+        dynamic "rules_source_list" {
+          for_each = lookup(rule_group.value, "rules_source_list", null) != null ? [true] : []
+          content {
+            # String value to specify whether domains in the target list are allowed or denied access. Valid values: ALLOWLIST, DENYLIST
+            generated_rules_type = rules_source_list.value.generated_rules_type
+            # Set of types of domain specifications that are provided in the targets argument. Valid values: HTTP_HOST, TLS_SNI
+            target_types = rules_source_list.value.target_types
+            # Set of domains that you want to inspect for in your traffic flows
+            targets = rules_source_list.value.targets
+          }
+        }
+        dynamic "stateful_rule" {
+          for_each = lookup(rule_group.value, "rules_source_list", null) != null ? [true] : []
+          content {
+            # Action to take with packets in a traffic flow when the flow matches the stateful rule criteria
+            # For all actions, AWS Network Firewall performs the specified action and discontinues stateful inspection of the traffic flow
+            # Valid values: ALERT, DROP or PASS
+            action = stateful_rule.value.action
+            # A configuration block containing the stateful 5-tuple inspection criteria for the rule, used to inspect traffic flows
+            header {
+              destination      = stateful_rule.value.header.destination
+              destination_port = stateful_rule.value.header.destination_port
+              direction        = stateful_rule.value.header.direction
+              protocol         = stateful_rule.value.header.protocol
+              source           = stateful_rule.value.header.source
+              source_port      = stateful_rule.value.header.source_port
+            }
+            rule_option {
+              keyword  = stateful_rule.value.rule_option.keyword
+              settings = lookup(stateful_rule.value.rule_option, "settings", null)
+            }
+          }
+        }
+        dynamic "stateless_rules_and_custom_actions" {
+          for_each = ""
+          content {
+            stateless_rule {
+              priority = 0
+              rule_definition {
+                actions = []
+                match_attributes {}
+              }
+            }
+          }
         }
       }
     }

@@ -78,8 +78,8 @@ variable "subnet_change_protection" {
 }
 
 variable "rule_group_config" {
-  type        = any
-  description = "Rule group configuration"
+  type        = map(any)
+  description = "Rule group configuration. Refer to https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group for configuration details"
 }
 
 variable "logging_config" {
