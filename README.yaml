@@ -1,0 +1,191 @@
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: terraform-aws-network-firewall
+# Tags of this project
+tags:
+  - aws
+  - terraform
+  - terraform-modules
+  - networking
+  - network
+  - network-firewall
+  - firewall
+  - firewall-rules
+  - vpc
+
+# Categories of this project
+categories:
+  - terraform-modules/networking
+
+# Logo for this project
+#logo: docs/logo.png
+
+# License of this project
+license: "APACHE2"
+
+# Canonical GitHub repo
+github_repo: cloudposse/terraform-aws-network-firewall
+
+# Badges to display
+badges:
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/terraform-aws-network-firewall.svg"
+    url: "https://github.com/cloudposse/terraform-aws-network-firewall/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+related:
+  - name: "terraform-aws-vpc"
+    description: "Terraform Module that defines a VPC with public/private subnets across multiple AZs with Internet Gateways"
+    url: "https://github.com/cloudposse/terraform-aws-vpc"
+  - name: "terraform-aws-dynamic-subnets"
+    description: "Terraform module for public and private subnets provisioning in existing VPC"
+    url: "https://github.com/cloudposse/terraform-aws-dynamic-subnets"
+  - name: "terraform-aws-named-subnets"
+    description: "Terraform module for named subnets provisioning."
+    url: "https://github.com/cloudposse/terraform-aws-named-subnets"
+  - name: "terraform-aws-vpc-peering"
+    description: "Terraform module to create a peering connection between two VPCs"
+    url: "https://github.com/cloudposse/terraform-aws-vpc-peering"
+
+# Short description of this project
+description: |-
+  Terraform module to provision AWS Network Firewall resources.
+
+# How to use this project
+usage: |2-
+
+  For a complete example, see [examples/complete](examples/complete)
+
+  For automated tests of the complete example using [bats](https://github.com/bats-core/bats-core) and [Terratest](https://github.com/gruntwork-io/terratest) (which tests and deploys the example on AWS), see [test](test).
+
+  ```hcl
+  provider "aws" {
+    region = var.region
+  }
+
+  module "vpc" {
+    source  = "cloudposse/vpc/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version     = "x.x.x"
+  
+    ipv4_primary_cidr_block = "172.19.0.0/16"
+  
+    context = module.this.context
+  }
+
+  module "subnets" {
+    source  = "cloudposse/dynamic-subnets/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version     = "x.x.x"
+
+    availability_zones   = var.availability_zones
+    vpc_id               = module.vpc.vpc_id
+    igw_id               = [module.vpc.igw_id]
+    ipv4_cidr_block      = [module.vpc.vpc_cidr_block]
+    nat_gateway_enabled  = false
+    nat_instance_enabled = false
+  
+    context = module.this.context
+  }
+
+  module "s3_log_storage" {
+    source  = "cloudposse/s3-log-storage/aws"
+    version = "1.0.0"
+  
+    force_destroy = true
+    attributes    = ["logs"]
+  
+    context = module.this.context
+  }
+
+  module "network_firewall" {
+    source  = "cloudposse/network-firewall/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version     = "x.x.x"
+
+    vpc_id     = module.vpc.vpc_id
+    subnet_ids = module.subnets.private_subnet_ids
+
+    network_firewall_name                     = var.network_firewall_name
+    network_firewall_description              = var.network_firewall_description
+    network_firewall_policy_name              = var.network_firewall_policy_name
+    policy_stateful_engine_options_rule_order = var.policy_stateful_engine_options_rule_order
+    stateful_default_actions                  = var.stateful_default_actions
+    stateless_default_actions                 = var.stateless_default_actions
+    stateless_fragment_default_actions        = var.stateless_fragment_default_actions
+    stateless_custom_actions                  = var.stateless_custom_actions
+    delete_protection                         = var.delete_protection
+    firewall_policy_change_protection         = var.firewall_policy_change_protection
+    subnet_change_protection                  = var.subnet_change_protection
+
+    logging_config = [
+      {
+        log_destination_type = "S3"
+        log_type             = "FLOW"
+        log_destination = {
+          bucketName = module.s3_log_storage.bucket_id
+          prefix     = "/network-firewall-logs"
+        }
+      }
+    ]
+
+    rule_group_config = {
+      stateful-inspection-for-blocking-packets-from-going-to-destination = {
+        capacity    = 50
+        name        = "block-packets-from-going-to-destination"
+        description = "Stateful Inspection for blocking packets from going to an intended destination"
+        type        = "STATEFUL"
+        rule_group = {
+          stateful_rule_options = {
+            rule_order = "STRICT_ORDER"
+          }
+          rules_source = {
+            stateful_rule = [
+              {
+                action = "DROP"
+                header = {
+                  destination      = "124.1.1.24/32"
+                  destination_port = 53
+                  direction        = "ANY"
+                  protocol         = "TCP"
+                  source           = "1.2.3.4/32"
+                  source_port      = 53
+                }
+                rule_option = {
+                  keyword = "sid:1"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+
+    context = module.this.context
+  }
+  ```
+
+# Example usage
+#examples: |-
+#  Example goes here...
+
+# How to get started quickly
+#quickstart: |-
+#  Here's how to get started...
+
+# Other files to include in this README from the project folder
+include:
+  - "docs/targets.md"
+  - "docs/terraform.md"
+
+# Contributors to this project
+contributors:
+  - name: "Erik Osterman"
+    github: "osterman"
+  - name: "Andriy Knysh"
+    github: "aknysh"
