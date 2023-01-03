@@ -264,19 +264,19 @@ resource "aws_networkfirewall_logging_configuration" "default" {
 
       content {
         # The location to send logs to. Valid values: S3, CloudWatchLogs, KinesisDataFirehose
-        log_destination_type = each.value.log_destination_type
+        log_destination_type = log_destination_config.value.log_destination_type
         # The type of log to send. Valid values: ALERT or FLOW
         # Alert logs report traffic that matches a StatefulRule with an action setting that sends a log message
         # Flow logs are standard network traffic flow logs
-        log_type = each.value.log_type
+        log_type = log_destination_config.value.log_type
         log_destination = {
           # For log_destination_type = "CloudWatchLogs"
-          logGroup = lookup(each.value.log_destination, "logGroup", null)
+          logGroup = lookup(log_destination_config.value.log_destination, "logGroup", null)
           # For log_destination_type = "S3"
-          bucketName = lookup(each.value.log_destination, "bucketName", null)
-          prefix     = lookup(each.value.log_destination, "prefix", null)
+          bucketName = lookup(log_destination_config.value.log_destination, "bucketName", null)
+          prefix     = lookup(log_destination_config.value.log_destination, "prefix", null)
           # For log_destination_type = "KinesisDataFirehose"
-          deliveryStream = lookup(each.value.log_destination, "deliveryStream", null)
+          deliveryStream = lookup(log_destination_config.value.log_destination, "deliveryStream", null)
         }
       }
     }
