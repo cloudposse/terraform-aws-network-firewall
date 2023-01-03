@@ -5,6 +5,7 @@ locals {
   network_firewall_policy_name = var.network_firewall_policy_name != null && var.network_firewall_policy_name != "" ? var.network_firewall_policy_name : module.this.id
   rule_group_config            = { for k, v in var.rule_group_config : k => v if local.enabled }
   logging_config               = { for k, v in var.logging_config : k => v if local.enabled }
+  logging_enabled              = length(keys(local.logging_config)) > 0
 }
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall
@@ -253,26 +254,30 @@ resource "aws_networkfirewall_firewall_policy" "default" {
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_logging_configuration
 resource "aws_networkfirewall_logging_configuration" "default" {
-  for_each = local.logging_config
+  count = local.logging_enabled ? 1 : 0
 
   firewall_arn = one(aws_networkfirewall_firewall.default.*.arn)
 
   logging_configuration {
-    log_destination_config {
-      # The location to send logs to. Valid values: S3, CloudWatchLogs, KinesisDataFirehose
-      log_destination_type = each.value.log_destination_type
-      # The type of log to send. Valid values: ALERT or FLOW
-      # Alert logs report traffic that matches a StatefulRule with an action setting that sends a log message
-      # Flow logs are standard network traffic flow logs
-      log_type = each.value.log_type
-      log_destination = {
-        # For log_destination_type = "CloudWatchLogs"
-        logGroup = lookup(each.value.log_destination, "logGroup", null)
-        # For log_destination_type = "S3"
-        bucketName = lookup(each.value.log_destination, "bucketName", null)
-        prefix     = lookup(each.value.log_destination, "prefix", null)
-        # For log_destination_type = "KinesisDataFirehose"
-        deliveryStream = lookup(each.value.log_destination, "deliveryStream", null)
+    dynamic "log_destination_config" {
+      for_each = local.logging_config
+
+      content {
+        # The location to send logs to. Valid values: S3, CloudWatchLogs, KinesisDataFirehose
+        log_destination_type = log_destination_config.value.log_destination_type
+        # The type of log to send. Valid values: ALERT or FLOW
+        # Alert logs report traffic that matches a StatefulRule with an action setting that sends a log message
+        # Flow logs are standard network traffic flow logs
+        log_type = log_destination_config.value.log_type
+        log_destination = {
+          # For log_destination_type = "CloudWatchLogs"
+          logGroup = lookup(log_destination_config.value.log_destination, "logGroup", null)
+          # For log_destination_type = "S3"
+          bucketName = lookup(log_destination_config.value.log_destination, "bucketName", null)
+          prefix     = lookup(log_destination_config.value.log_destination, "prefix", null)
+          # For log_destination_type = "KinesisDataFirehose"
+          deliveryStream = lookup(log_destination_config.value.log_destination, "deliveryStream", null)
+        }
       }
     }
   }

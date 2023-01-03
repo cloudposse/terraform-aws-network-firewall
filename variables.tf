@@ -83,7 +83,7 @@ variable "rule_group_config" {
 }
 
 variable "logging_config" {
-  type        = any
+  type        = map(any)
   description = "Logging configuration"
   default     = {}
 }
