@@ -180,7 +180,7 @@ module "network_firewall" {
   rule_group_config = {
     stateful-inspection-for-blocking-packets-from-going-to-destination = {
       capacity    = 50
-      name        = "block-packets-from-going-to-destination"
+      name        = "block-packets-from-reaching-destination"
       description = "Stateful Inspection for blocking packets from going to an intended destination"
       type        = "STATEFUL"
       rule_group = {
