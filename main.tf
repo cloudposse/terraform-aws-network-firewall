@@ -6,6 +6,14 @@ locals {
   rule_group_config            = { for k, v in var.rule_group_config : k => v if local.enabled }
   logging_config               = { for k, v in var.logging_config : k => v if local.enabled }
   logging_enabled              = length(keys(local.logging_config)) > 0
+
+  az_subnet_endpoint_stats = local.enabled ? [
+    for s in aws_networkfirewall_firewall.default[0].firewall_status[0].sync_states : {
+      az          = s.availability_zone
+      endpoint_id = s.attachment[0].endpoint_id
+      subnet_id   = s.attachment[0].subnet_id
+    }
+  ] : []
 }
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall

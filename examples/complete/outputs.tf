@@ -42,3 +42,8 @@ output "network_firewall_policy_arn" {
   description = "Network Firewall policy ARN"
   value       = module.network_firewall.network_firewall_policy_arn
 }
+
+output "az_subnet_endpoint_stats" {
+  description = "List of objects with each object having three items: AZ, subnet ID, firewall VPC endpoint ID"
+  value       = module.network_firewall.az_subnet_endpoint_stats
+}

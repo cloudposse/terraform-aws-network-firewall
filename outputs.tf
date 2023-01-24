@@ -27,3 +27,8 @@ output "network_firewall_policy_arn" {
   description = "Network Firewall policy ARN"
   value       = one(aws_networkfirewall_firewall_policy.default.*.arn)
 }
+
+output "az_subnet_endpoint_stats" {
+  description = "List of objects with each object having three items: AZ, subnet ID, firewall VPC endpoint ID"
+  value       = local.az_subnet_endpoint_stats
+}
