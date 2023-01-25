@@ -4,7 +4,7 @@ provider "aws" {
 
 module "vpc" {
   source  = "cloudposse/vpc/aws"
-  version = "1.2.0"
+  version = "2.0.0"
 
   ipv4_primary_cidr_block = "172.19.0.0/16"
 
@@ -77,7 +77,7 @@ module "network_firewall" {
   rule_group_config = {
     stateful-inspection-for-blocking-packets-from-going-to-destination = {
       capacity    = 50
-      name        = "block-packets-from-going-to-destination"
+      name        = "block-packets-from-reaching-destination"
       description = "Stateful Inspection for blocking packets from going to an intended destination"
       type        = "STATEFUL"
       rule_group = {

@@ -180,7 +180,7 @@ module "network_firewall" {
   rule_group_config = {
     stateful-inspection-for-blocking-packets-from-going-to-destination = {
       capacity    = 50
-      name        = "block-packets-from-going-to-destination"
+      name        = "block-packets-from-reaching-destination"
       description = "Stateful Inspection for blocking packets from going to an intended destination"
       type        = "STATEFUL"
       rule_group = {
@@ -301,6 +301,7 @@ Available targets:
 
 | Name | Description |
 |------|-------------|
+| <a name="output_az_subnet_endpoint_stats"></a> [az\_subnet\_endpoint\_stats](#output\_az\_subnet\_endpoint\_stats) | List of objects with each object having three items: AZ, subnet ID, firewall VPC endpoint ID |
 | <a name="output_network_firewall_arn"></a> [network\_firewall\_arn](#output\_network\_firewall\_arn) | Network Firewall ARN |
 | <a name="output_network_firewall_name"></a> [network\_firewall\_name](#output\_network\_firewall\_name) | Network Firewall ID |
 | <a name="output_network_firewall_policy_arn"></a> [network\_firewall\_policy\_arn](#output\_network\_firewall\_policy\_arn) | Network Firewall policy ARN |
