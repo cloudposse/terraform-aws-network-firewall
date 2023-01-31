@@ -199,9 +199,12 @@ module "network_firewall" {
                 source           = "1.2.3.4/32"
                 source_port      = 53
               }
-              rule_option = {
-                keyword = "sid:1"
-              }
+              rule_option = [
+                {
+                  keyword  = "sid"
+                  settings = ["1"]
+                }
+              ]
             }
           ]
         }
