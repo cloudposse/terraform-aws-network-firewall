@@ -49,7 +49,7 @@ resource "aws_networkfirewall_rule_group" "default" {
   description = lookup(each.value, "description", each.value.name)
   capacity    = each.value.capacity
 
-  # The stateful rule group rules specifications in Suricata file format, with one rule per line
+  # The stateful rule group rules specifications in Suricata format, with one rule per line
   # Use this to import your existing Suricata compatible rule groups
   rules = lookup(each.value, "suricata_rules_file_path", null) != null ? file(each.value.suricata_rules_file_path) : null
 
@@ -113,6 +113,7 @@ resource "aws_networkfirewall_rule_group" "default" {
             targets = each.value.rule_group.rules_source.rules_source_list.targets
           }
         }
+
         dynamic "stateful_rule" {
           for_each = lookup(each.value.rule_group.rules_source, "stateful_rule", [])
           content {
@@ -129,23 +130,27 @@ resource "aws_networkfirewall_rule_group" "default" {
               source           = stateful_rule.value.header.source
               source_port      = stateful_rule.value.header.source_port
             }
-            rule_option {
-              keyword  = stateful_rule.value.rule_option.keyword
-              settings = lookup(stateful_rule.value.rule_option, "settings", null)
+            dynamic "rule_option" {
+              for_each = lookup(stateful_rule.value, "rule_option", [])
+              content {
+                keyword  = rule_option.value.keyword
+                settings = lookup(rule_option.value, "settings", null)
+              }
             }
           }
         }
+
         dynamic "stateless_rules_and_custom_actions" {
           for_each = lookup(each.value.rule_group.rules_source, "stateless_rules_and_custom_actions", null) != null ? [true] : []
           content {
             dynamic "custom_action" {
-              for_each = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions, "custom_action", null) != null ? [true] : []
+              for_each = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions, "custom_action", [])
               content {
-                action_name = each.value.rule_group.rules_source.stateless_rules_and_custom_actions.action_name
+                action_name = custom_action.value.action_name
                 action_definition {
                   publish_metric_action {
                     dynamic "dimension" {
-                      for_each = each.value.rule_group.rules_source.stateless_rules_and_custom_actions.dimensions
+                      for_each = custom_action.value.dimensions
                       content {
                         value = dimension.value
                       }
@@ -154,43 +159,47 @@ resource "aws_networkfirewall_rule_group" "default" {
                 }
               }
             }
-            stateless_rule {
-              priority = each.value.rule_group.rules_source.stateless_rules_and_custom_actions.stateless_rule.priority
-              rule_definition {
-                actions = each.value.rule_group.rules_source.stateless_rules_and_custom_actions.stateless_rule.rule_definition.actions
-                match_attributes {
-                  protocols = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions.stateless_rule.rule_definition.match_attributes, "protocols", [])
-                  dynamic "destination" {
-                    for_each = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions.stateless_rule.rule_definition.match_attributes, "destination", [])
-                    content {
-                      address_definition = destination.value
+
+            dynamic "stateless_rule" {
+              for_each = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions, "stateless_rule", [])
+              content {
+                priority = stateless_rule.value.priority
+                rule_definition {
+                  actions = stateless_rule.value.rule_definition.actions
+                  match_attributes {
+                    protocols = lookup(stateless_rule.value.rule_definition.match_attributes, "protocols", [])
+                    dynamic "destination" {
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "destination", [])
+                      content {
+                        address_definition = destination.value
+                      }
                     }
-                  }
-                  dynamic "destination_port" {
-                    for_each = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions.stateless_rule.rule_definition.match_attributes, "destination_port", [])
-                    content {
-                      from_port = destination_port.value.from_port
-                      to_port   = lookup(destination_port.value, "to_port", null)
+                    dynamic "destination_port" {
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "destination_port", [])
+                      content {
+                        from_port = destination_port.value.from_port
+                        to_port   = lookup(destination_port.value, "to_port", null)
+                      }
                     }
-                  }
-                  dynamic "source" {
-                    for_each = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions.stateless_rule.rule_definition.match_attributes, "source", [])
-                    content {
-                      address_definition = source.value
+                    dynamic "source" {
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "source", [])
+                      content {
+                        address_definition = source.value
+                      }
                     }
-                  }
-                  dynamic "source_port" {
-                    for_each = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions.stateless_rule.rule_definition.match_attributes, "source_port", [])
-                    content {
-                      from_port = source_port.value
-                      to_port   = lookup(source_port.value, "to_port", null)
+                    dynamic "source_port" {
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "source_port", [])
+                      content {
+                        from_port = source_port.value
+                        to_port   = lookup(source_port.value, "to_port", null)
+                      }
                     }
-                  }
-                  dynamic "tcp_flag" {
-                    for_each = lookup(each.value.rule_group.rules_source.stateless_rules_and_custom_actions.stateless_rule.rule_definition.match_attributes, "tcp_flag", [])
-                    content {
-                      flags = tcp_flag.value.flags
-                      masks = lookup(tcp_flag.value, "masks", null)
+                    dynamic "tcp_flag" {
+                      for_each = lookup(stateless_rule.value.rule_definition.match_attributes, "tcp_flag", [])
+                      content {
+                        flags = tcp_flag.value.flags
+                        masks = lookup(tcp_flag.value, "masks", null)
+                      }
                     }
                   }
                 }
