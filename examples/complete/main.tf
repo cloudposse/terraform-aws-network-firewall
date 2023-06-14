@@ -4,16 +4,16 @@ provider "aws" {
 
 module "vpc" {
   source  = "cloudposse/vpc/aws"
-  version = "2.0.0"
+  version = "2.1.0"
 
-  ipv4_primary_cidr_block = "172.19.0.0/16"
+  ipv4_primary_cidr_block = var.vpc_cidr_block
 
   context = module.this.context
 }
 
 module "subnets" {
   source  = "cloudposse/dynamic-subnets/aws"
-  version = "2.0.4"
+  version = "2.3.0"
 
   availability_zones   = var.availability_zones
   vpc_id               = module.vpc.vpc_id
@@ -27,7 +27,7 @@ module "subnets" {
 
 module "s3_log_storage" {
   source  = "cloudposse/s3-log-storage/aws"
-  version = "1.0.0"
+  version = "1.4.1"
 
   force_destroy = true
   attributes    = ["logs"]

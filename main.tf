@@ -24,7 +24,7 @@ resource "aws_networkfirewall_firewall" "default" {
   description = local.network_firewall_description
   vpc_id      = var.vpc_id
 
-  firewall_policy_arn               = one(aws_networkfirewall_firewall_policy.default.*.arn)
+  firewall_policy_arn               = one(aws_networkfirewall_firewall_policy.default[*].arn)
   firewall_policy_change_protection = var.firewall_policy_change_protection
   subnet_change_protection          = var.subnet_change_protection
   delete_protection                 = var.delete_protection
@@ -273,7 +273,7 @@ resource "aws_networkfirewall_firewall_policy" "default" {
 resource "aws_networkfirewall_logging_configuration" "default" {
   count = local.logging_enabled ? 1 : 0
 
-  firewall_arn = one(aws_networkfirewall_firewall.default.*.arn)
+  firewall_arn = one(aws_networkfirewall_firewall.default[*].arn)
 
   logging_configuration {
     dynamic "log_destination_config" {
