@@ -32,12 +32,17 @@ github_repo: cloudposse/terraform-aws-network-firewall
 
 # Badges to display
 badges:
-  - name: "Latest Release"
-    image: "https://img.shields.io/github/release/cloudposse/terraform-aws-network-firewall.svg"
-    url: "https://github.com/cloudposse/terraform-aws-network-firewall/releases/latest"
-  - name: "Slack Community"
-    image: "https://slack.cloudposse.com/badge.svg"
-    url: "https://slack.cloudposse.com"
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudposse/terraform-aws-network-firewall.svg?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-aws-network-firewall/releases/latest
+  - name: Last Updated
+    image: https://img.shields.io/github/last-commit/cloudposse/terraform-aws-network-firewall.svg?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-aws-network-firewall/commits
+  - name: Slack Community
+    image: https://slack.cloudposse.com/for-the-badge.svg
+    url: https://slack.cloudposse.com
+
+# List any related terraform modules that this module may be used with or that this module depends on.
 related:
   - name: "terraform-aws-vpc"
     description: "Terraform Module that defines a VPC with public/private subnets across multiple AZs with Internet Gateways"
@@ -72,9 +77,9 @@ usage: |2-
     source  = "cloudposse/vpc/aws"
     # Cloud Posse recommends pinning every module to a specific version
     # version     = "x.x.x"
-  
+
     ipv4_primary_cidr_block = "172.19.0.0/16"
-  
+
     context = module.this.context
   }
 
@@ -89,17 +94,17 @@ usage: |2-
     ipv4_cidr_block      = [module.vpc.vpc_cidr_block]
     nat_gateway_enabled  = false
     nat_instance_enabled = false
-  
+
     context = module.this.context
   }
 
   module "s3_log_storage" {
     source  = "cloudposse/s3-log-storage/aws"
     version = "1.0.0"
-  
+
     force_destroy = true
     attributes    = ["logs"]
-  
+
     context = module.this.context
   }
 
@@ -195,8 +200,4 @@ include:
   - "docs/terraform.md"
 
 # Contributors to this project
-contributors:
-  - name: "Erik Osterman"
-    github: "osterman"
-  - name: "Andriy Knysh"
-    github: "aknysh"
+contributors: []
