@@ -1,0 +1,7 @@
+# Upstream changes from _extends are only recognized when modifications are made to this file in the default branch.
+_extends: .github
+repository:
+  name: terraform-aws-network-firewall
+  description: Terraform module to provision and manage AWS Network Firewall resources
+  homepage: https://cloudposse.com/accelerate
+  topics: aws, firewall, firewall-management, firewall-rules, network, network-firewall, rules, vpc
