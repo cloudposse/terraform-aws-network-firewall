@@ -5,3 +5,4 @@ repository:
   description: Terraform module to provision and manage AWS Network Firewall resources
   homepage: https://cloudposse.com/accelerate
   topics: aws, firewall, firewall-management, firewall-rules, network, network-firewall, rules, vpc
+
