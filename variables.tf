@@ -23,7 +23,24 @@ variable "subnet_ids" {
 
 variable "vpc_id" {
   type        = string
-  description = "VPC ID"
+  description = "The unique identifier of the VPC where AWS Network Firewall should create the firewall. Either 'vpc_id' or 'transit_gateway_id' must be provided, but not both"
+  default     = null
+
+  validation {
+    condition     = (var.vpc_id != null) != (var.transit_gateway_id != null)
+    error_message = "Exactly one of 'vpc_id' or 'transit_gateway_id' must be provided, not both or neither."
+  }
+}
+
+variable "transit_gateway_id" {
+  type        = string
+  description = "The unique identifier of the transit gateway to attach to this firewall. You can provide either a transit gateway from your account or one that has been shared with you through AWS Resource Access Manager. Either 'vpc_id' or 'transit_gateway_id' must be provided, but not both"
+  default     = null
+
+  validation {
+    condition     = (var.vpc_id != null) != (var.transit_gateway_id != null)
+    error_message = "Exactly one of 'vpc_id' or 'transit_gateway_id' must be provided, not both or neither."
+  }
 }
 
 variable "policy_stateful_engine_options_rule_order" {
