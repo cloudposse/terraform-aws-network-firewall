@@ -27,6 +27,9 @@ resource "aws_networkfirewall_firewall" "default" {
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall#transit-gateway-attached-firewall
   # https://docs.aws.amazon.com/network-firewall/latest/developerguide/tgw-firewall.html
   # https://aws.amazon.com/about-aws/whats-new/2025/06/aws-network-firewall-transit-gateway-native-integration/
+  # https://docs.aws.amazon.com/network-firewall/latest/developerguide/vpc-config-tgw-multi-az.html
+  # https://docs.aws.amazon.com/network-firewall/latest/developerguide/working-with-tgw-firewalls.html
+  # https://d1.awsstatic.com/architecture-diagrams/ArchitectureDiagrams/inspection-deployment-models-with-AWS-network-firewall-ra.pdf
   vpc_id             = var.vpc_id
   transit_gateway_id = var.transit_gateway_id
 
