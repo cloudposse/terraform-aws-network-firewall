@@ -4,7 +4,7 @@ provider "aws" {
 
 module "vpc" {
   source  = "cloudposse/vpc/aws"
-  version = "2.0.0"
+  version = "3.0.0"
 
   ipv4_primary_cidr_block = "172.19.0.0/16"
 
@@ -13,7 +13,7 @@ module "vpc" {
 
 module "subnets" {
   source  = "cloudposse/dynamic-subnets/aws"
-  version = "2.0.4"
+  version = "2.4.2"
 
   availability_zones   = var.availability_zones
   vpc_id               = module.vpc.vpc_id
@@ -27,7 +27,7 @@ module "subnets" {
 
 module "s3_log_storage" {
   source  = "cloudposse/s3-log-storage/aws"
-  version = "1.0.0"
+  version = "2.0.0"
 
   force_destroy = true
   attributes    = ["logs"]
@@ -77,7 +77,7 @@ module "network_firewall" {
   rule_group_config = {
     stateful-inspection-for-blocking-packets-from-going-to-destination = {
       capacity    = 50
-      name        = "block-packets-from-reaching-destination"
+      name        = module.this.id
       description = "Stateful Inspection for blocking packets from going to an intended destination"
       type        = "STATEFUL"
       rule_group = {

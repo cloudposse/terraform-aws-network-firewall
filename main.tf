@@ -22,9 +22,18 @@ resource "aws_networkfirewall_firewall" "default" {
 
   name        = local.network_firewall_name
   description = local.network_firewall_description
-  vpc_id      = var.vpc_id
 
-  firewall_policy_arn               = one(aws_networkfirewall_firewall_policy.default.*.arn)
+  # Either 'vpc_id' or 'transit_gateway_id' must be provided, but not both.
+  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall#transit-gateway-attached-firewall
+  # https://docs.aws.amazon.com/network-firewall/latest/developerguide/tgw-firewall.html
+  # https://aws.amazon.com/about-aws/whats-new/2025/06/aws-network-firewall-transit-gateway-native-integration/
+  # https://docs.aws.amazon.com/network-firewall/latest/developerguide/vpc-config-tgw-multi-az.html
+  # https://docs.aws.amazon.com/network-firewall/latest/developerguide/working-with-tgw-firewalls.html
+  # https://d1.awsstatic.com/architecture-diagrams/ArchitectureDiagrams/inspection-deployment-models-with-AWS-network-firewall-ra.pdf
+  vpc_id             = var.vpc_id
+  transit_gateway_id = var.transit_gateway_id
+
+  firewall_policy_arn               = one(aws_networkfirewall_firewall_policy.default[*].arn)
   firewall_policy_change_protection = var.firewall_policy_change_protection
   subnet_change_protection          = var.subnet_change_protection
   delete_protection                 = var.delete_protection
@@ -38,6 +47,13 @@ resource "aws_networkfirewall_firewall" "default" {
   }
 
   tags = module.this.tags
+
+  lifecycle {
+    precondition {
+      condition     = !local.enabled || ((var.vpc_id != null) != (var.transit_gateway_id != null))
+      error_message = "Exactly one of 'vpc_id' or 'transit_gateway_id' must be provided, not both or neither."
+    }
+  }
 }
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group
@@ -273,7 +289,7 @@ resource "aws_networkfirewall_firewall_policy" "default" {
 resource "aws_networkfirewall_logging_configuration" "default" {
   count = local.logging_enabled ? 1 : 0
 
-  firewall_arn = one(aws_networkfirewall_firewall.default.*.arn)
+  firewall_arn = one(aws_networkfirewall_firewall.default[*].arn)
 
   logging_configuration {
     dynamic "log_destination_config" {
