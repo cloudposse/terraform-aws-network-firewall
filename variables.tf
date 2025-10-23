@@ -18,7 +18,8 @@ variable "network_firewall_policy_name" {
 
 variable "subnet_ids" {
   type        = list(string)
-  description = "List of subnet IDs for firewall endpoints"
+  description = "List of subnet IDs for firewall endpoints. Required when using 'vpc_id', not used when using 'transit_gateway_id'"
+  default     = []
 }
 
 variable "vpc_id" {
@@ -29,8 +30,14 @@ variable "vpc_id" {
 
 variable "transit_gateway_id" {
   type        = string
-  description = "The unique identifier of the transit gateway to attach to this firewall. You can provide either a transit gateway from your account or one that has been shared with you through AWS Resource Access Manager. Either 'vpc_id' or 'transit_gateway_id' must be provided, but not both"
+  description = "The unique identifier of the Transit Gateway to attach to this firewall. You can provide either a Transit Gateway from your account or one that has been shared with you through AWS Resource Access Manager. Either 'vpc_id' or 'transit_gateway_id' must be provided, but not both"
   default     = null
+}
+
+variable "availability_zone_ids" {
+  type        = list(string)
+  description = "List of Availability Zone IDs where firewall endpoints will be created for a transit gateway-attached firewall. Required when using 'transit_gateway_id', not used when using 'vpc_id'"
+  default     = []
 }
 
 variable "policy_stateful_engine_options_rule_order" {
