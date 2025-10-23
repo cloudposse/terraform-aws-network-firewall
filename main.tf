@@ -7,7 +7,11 @@ locals {
   logging_config               = { for k, v in var.logging_config : k => v if local.enabled }
   logging_enabled              = length(keys(local.logging_config)) > 0
 
-  az_subnet_endpoint_stats = local.enabled ? [
+  # Determine deployment mode
+  is_vpc_mode = var.vpc_id != null
+  is_tgw_mode = var.transit_gateway_id != null
+
+  az_subnet_endpoint_stats = local.enabled && local.is_vpc_mode ? [
     for s in aws_networkfirewall_firewall.default[0].firewall_status[0].sync_states : {
       az          = s.availability_zone
       endpoint_id = s.attachment[0].endpoint_id
@@ -38,11 +42,21 @@ resource "aws_networkfirewall_firewall" "default" {
   subnet_change_protection          = var.subnet_change_protection
   delete_protection                 = var.delete_protection
 
+  # VPC mode: use subnet_mapping
   dynamic "subnet_mapping" {
-    for_each = toset(var.subnet_ids)
+    for_each = local.is_vpc_mode ? toset(var.subnet_ids) : []
 
     content {
       subnet_id = subnet_mapping.value
+    }
+  }
+
+  # Transit Gateway mode: use availability_zone_mapping
+  dynamic "availability_zone_mapping" {
+    for_each = local.is_tgw_mode ? toset(var.availability_zone_ids) : []
+
+    content {
+      availability_zone_id = availability_zone_mapping.value
     }
   }
 
@@ -52,6 +66,16 @@ resource "aws_networkfirewall_firewall" "default" {
     precondition {
       condition     = !local.enabled || ((var.vpc_id != null) != (var.transit_gateway_id != null))
       error_message = "Exactly one of 'vpc_id' or 'transit_gateway_id' must be provided, not both or neither."
+    }
+
+    precondition {
+      condition     = !local.enabled || !local.is_vpc_mode || length(var.subnet_ids) > 0
+      error_message = "When using VPC mode (vpc_id is set), 'subnet_ids' must be provided and cannot be empty."
+    }
+
+    precondition {
+      condition     = !local.enabled || !local.is_tgw_mode || length(var.availability_zone_ids) > 0
+      error_message = "When using Transit Gateway mode (transit_gateway_id is set), 'availability_zone_ids' must be provided and cannot be empty."
     }
   }
 }

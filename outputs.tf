@@ -29,6 +29,16 @@ output "network_firewall_policy_arn" {
 }
 
 output "az_subnet_endpoint_stats" {
-  description = "List of objects with each object having three items: AZ, subnet ID, firewall VPC endpoint ID"
+  description = "List of objects with each object having three items: AZ, subnet ID, firewall VPC endpoint ID. Only applicable in VPC mode"
   value       = local.az_subnet_endpoint_stats
+}
+
+output "transit_gateway_attachment_id" {
+  description = "The unique identifier of the transit gateway attachment. Only applicable in Transit Gateway mode"
+  value       = local.enabled && local.is_tgw_mode ? try(one(aws_networkfirewall_firewall.default[*].firewall_status[0].transit_gateway_attachment_sync_states[0].attachment_id), null) : null
+}
+
+output "transit_gateway_owner_account_id" {
+  description = "The AWS account ID that owns the transit gateway. Only applicable in Transit Gateway mode"
+  value       = local.enabled && local.is_tgw_mode ? try(one(aws_networkfirewall_firewall.default[*].transit_gateway_owner_account_id), null) : null
 }
