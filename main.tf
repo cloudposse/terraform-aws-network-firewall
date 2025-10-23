@@ -47,6 +47,13 @@ resource "aws_networkfirewall_firewall" "default" {
   }
 
   tags = module.this.tags
+
+  lifecycle {
+    precondition {
+      condition     = (var.vpc_id != null) != (var.transit_gateway_id != null)
+      error_message = "Exactly one of 'vpc_id' or 'transit_gateway_id' must be provided, not both or neither."
+    }
+  }
 }
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group
